@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>会社検索</title>
+  <meta charset="UTF-8"> <!-- 文字コード指定 -->
+</head>
+
+<body>
+
+  <h1>会社検索</h1>
+
+  <!-- 会社名を入力するフォーム -->
+  <form id="searchForm">
+    <label for="companyInput">会社名:</label>
+    <input type="text" id="companyInput" required> <!-- required属性で空入力を簡易的に防止 -->
+    <button type="submit">検索</button>
+  </form>
+
+  <h2>結果</h2>
+  <!-- 検索結果やエラーメッセージを表示する場所 -->
+  <div id="results">
+    ここに検索結果が表示されます。
+  </div>
+
+  <script>
+    // HTML要素を取得
+    const form = document.getElementById('searchForm');
+    const companyInput = document.getElementById('companyInput');
+    const resultsDiv = document.getElementById('results');
+
+    // フォームが送信されたときの処理
+    form.addEventListener('submit', async (event) => {
+      // ページの再読み込みを防ぐ
+      event.preventDefault();
+
+      // 入力された会社名を取得
+      const companyName = companyInput.value;
+
+      // 結果表示エリアを初期化し、「検索中」と表示
+      resultsDiv.textContent = '検索中...';
+
+      try {
+        // WorkerのAPIエンドポイントにリクエストを送信
+        // 相対パスとクエリパラメータを使用
+        const response = await fetch(`/api/beverages?companyName=${encodeURIComponent(companyName)}`);
+
+        // レスポンスボディをJSONとして解析
+        const data = await response.json();
+
+        // HTTPステータスコードが成功(2xx)か確認
+        if (response.ok) {
+          // 結果が空配列の場合も考慮して表示
+          if (Array.isArray(data) && data.length > 0) {
+            // 結果をリスト形式で表示
+            resultsDiv.innerHTML = ''; // 前の結果をクリア
+            const list = document.createElement('ul');
+            data.forEach(item => {
+              const listItem = document.createElement('li');
+              // WorkerのSELECT文で取得されるカラムを表示 (必要なら調整)
+              listItem.textContent = `顧客ID: ${item.CustomerID}, 会社名: ${item.CompanyName}, 担当者名: ${item.ContactName}`;
+              list.appendChild(listItem);
+            });
+            resultsDiv.appendChild(list);
+          } else {
+            resultsDiv.textContent = '該当する会社は見つかりませんでした。';
+          }
+        } else {
+          // APIがエラーを返した場合 (例: 400 Bad Request, 500 Internal Server Error)
+          resultsDiv.textContent = `エラー: ${data.error || '不明なエラーが発生しました。'}`;
+        }
+      } catch (error) {
+        // ネットワークエラーなど、通信自体に失敗した場合
+        console.error('Fetch failed:', error);
+        resultsDiv.textContent = '検索中にエラーが発生しました。ネットワーク接続を確認してください。';
+      }
+    });
+  </script>
+
+</body>
+
+</html>

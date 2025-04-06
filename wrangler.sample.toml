@@ -1,0 +1,20 @@
+# 使うときはこのファイル名を[wrangler.toml]に変更する
+# または、$wrangler deploy --config wrangler.XXXX.tomlのように適用する
+
+# Worker の名前
+name = "d1"
+
+# Worker のエントリーポイントファイル
+main = "src/index.ts"
+
+# 互換性日付 (指定されたものをそのまま使用)
+compatibility_date = "2025-03-29"
+
+assets = { directory = "./public" }
+
+# D1 Database の設定 (JSONから変換)
+[[d1_databases]]
+binding = "DB"                     # Workerコード内で env.DB としてアクセスする名前
+database_name = "firstd1"
+database_id = "xxxxxxxx"           # あなたのデータベースのID
+

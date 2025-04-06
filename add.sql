@@ -1,0 +1,1 @@
+INSERT INTO Customers (CustomerID, CompanyName, ContactName) VALUES (23, 'name', 'Maria Anders');
